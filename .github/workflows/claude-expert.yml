@@ -50,29 +50,33 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: 🎯 Set Dynamic Prompt
+        id: set-prompt
+        run: |
+          if [[ "${{ github.event_name }}" == "issue_comment" && "${{ contains(github.event.comment.body, '@claude') }}" == "true" ]]; then
+            # User mentioned @claude in a comment
+            echo "prompt=${{ github.event.comment.body }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "issues" && "${{ github.event.action }}" == "opened" ]]; then
+            # New issue opened - analyze and triage
+            echo "prompt=New issue opened: \"${{ github.event.issue.title }}\". Please analyze this issue for the Claude Bootstrap Template repository and provide appropriate labels, categorization, and initial response. If it's a bug report, investigate. If it's a feature request, provide implementation guidance. If it's a support question, provide helpful answers with examples." >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # New PR opened - review it
+            echo "prompt=A new pull request has been opened for the Claude Bootstrap Template. Please review the changes for: 1) Code quality and best practices 2) Template functionality 3) Documentation accuracy 4) Potential breaking changes 5) Security considerations. Provide constructive feedback and suggestions." >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "schedule" ]]; then
+            # Weekly maintenance
+            echo "prompt=Perform weekly maintenance on the Claude Bootstrap Template repository: 1) Check for dependency updates 2) Review open issues and PRs 3) Update documentation if needed 4) Test template functionality 5) Look for potential improvements 6) Check for security vulnerabilities" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            # Manual trigger with custom task
+            echo "prompt=${{ inputs.task }}" >> $GITHUB_OUTPUT
+          else
+            # Default maintenance task
+            echo "prompt=General repository maintenance and support" >> $GITHUB_OUTPUT
+          fi
+
       - name: 🤖 Claude Code Agent
         uses: anthropics/claude-code-action@v1
         with:
-          # Dynamic prompt based on trigger event
-          prompt: |
-            ${{ 
-              github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude') && 
-              github.event.comment.body ||
-              
-              github.event_name == 'issues' && github.event.action == 'opened' &&
-              format('New issue opened: "{0}". Please analyze this issue for the Claude Bootstrap Template repository and provide appropriate labels, categorization, and initial response. If it\'s a bug report, investigate. If it\'s a feature request, provide implementation guidance. If it\'s a support question, provide helpful answers with examples.', github.event.issue.title) ||
-              
-              github.event_name == 'pull_request' && 
-              'A new pull request has been opened for the Claude Bootstrap Template. Please review the changes for: 1) Code quality and best practices 2) Template functionality 3) Documentation accuracy 4) Potential breaking changes 5) Security considerations. Provide constructive feedback and suggestions.' ||
-              
-              github.event_name == 'schedule' &&
-              'Perform weekly maintenance on the Claude Bootstrap Template repository: 1) Check for dependency updates 2) Review open issues and PRs 3) Update documentation if needed 4) Test template functionality 5) Look for potential improvements 6) Check for security vulnerabilities' ||
-              
-              github.event_name == 'workflow_dispatch' &&
-              inputs.task ||
-              
-              'General repository maintenance and support'
-            }}
+          prompt: ${{ steps.set-prompt.outputs.prompt }}
             
           # Enhanced system prompt for template management
           append_system_prompt: |
@@ -300,4 +304,3 @@ jobs:
             mcp__github__create_pull_request
             
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          
