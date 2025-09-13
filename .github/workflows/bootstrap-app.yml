@@ -1,0 +1,482 @@
+Here’s the complete `.github/workflows/bootstrap-app.yml` file:
+
+```yaml
+name: 🚀 Bootstrap Application with Claude Code
+
+on:
+  push:
+    paths:
+      - 'prompt.md'
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      force_bootstrap:
+        description: 'Force bootstrap even if prompt.md unchanged'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      actions: write
+
+    steps:
+      - name: 🔍 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: ⚡ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 🤖 Install Claude Code CLI
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          echo "✅ Claude Code CLI installed"
+          claude --version || echo "⚠️ Claude version check failed, but continuing..."
+
+      - name: 🔧 Configure Claude Code
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "❌ Error: ANTHROPIC_API_KEY secret not set!"
+            echo "Please add your Anthropic API key as a repository secret named 'ANTHROPIC_API_KEY'"
+            exit 1
+          fi
+          
+          mkdir -p ~/.claude
+          cat > ~/.claude/config.json << EOF
+          {
+            "apiKey": "$ANTHROPIC_API_KEY",
+            "model": "claude-sonnet-4-20250514",
+            "autoCommit": false,
+            "dangerouslySkipPermissions": true
+          }
+          EOF
+          echo "✅ Claude Code configured"
+
+      - name: 📋 Validate Prompt
+        run: |
+          if [ ! -f "prompt.md" ]; then
+            echo "❌ Error: prompt.md file not found!"
+            echo "Please create a prompt.md file with your bootstrap requirements."
+            echo "See the template repository README for examples."
+            exit 1
+          fi
+          
+          if [ ! -s "prompt.md" ]; then
+            echo "❌ Error: prompt.md file is empty!"
+            echo "Please add your bootstrap requirements to prompt.md"
+            exit 1
+          fi
+          
+          echo "✅ Prompt file validated ($(wc -w < prompt.md) words)"
+
+      - name: 🏗️ Bootstrap Application
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          echo "🤖 Starting bootstrap process for $REPO_NAME..."
+          
+          # Read the user's prompt
+          PROMPT_CONTENT=$(cat prompt.md)
+          
+          # Create comprehensive bootstrap instruction
+          cat > .bootstrap_instruction.md << 'EOL'
+          You are bootstrapping a new application. Here's what the user wants:
+
+          ---
+          PLACEHOLDER_PROMPT_CONTENT
+          ---
+
+          # Bootstrap Instructions
+
+          Please create a complete, production-ready application following these steps:
+
+          ## 1. Project Analysis & Planning
+          - Analyze the requirements and choose the optimal tech stack
+          - Determine project structure and architecture
+          - Identify required dependencies and tools
+
+          ## 2. Core Project Structure
+          Create a complete project with:
+          - Proper directory structure following industry best practices
+          - Package manager configuration (package.json, requirements.txt, Cargo.toml, etc.)
+          - Environment configuration files (.env.example, .env.local.example)
+          - Configuration files for chosen tech stack (tsconfig.json, webpack.config.js, etc.)
+
+          ## 3. Development Tooling Setup
+          - **Code Formatting**: Prettier, Black, rustfmt, or equivalent with configuration
+          - **Linting**: ESLint, Flake8, Clippy, or equivalent with strict rules
+          - **Pre-commit Hooks**: Husky, pre-commit, or equivalent to enforce quality
+          - **Type Checking**: TypeScript, mypy, or equivalent if applicable
+          - **Testing Framework**: Jest/Vitest, pytest, cargo test, or equivalent with example tests
+          - **Git Configuration**: Comprehensive .gitignore for the tech stack
+
+          ## 4. Application Code
+          - Main application entry points and core structure
+          - Basic functionality implementing the core requirements
+          - Proper error handling and logging throughout
+          - Input validation and security measures
+          - API documentation if applicable (OpenAPI/Swagger, JSDoc, etc.)
+          - Database schemas and migrations if needed
+
+          ## 5. DevOps & Deployment
+          - **Containerization**: Dockerfile with multi-stage builds if applicable
+          - **GitHub Actions**: Complete CI/CD pipeline for testing and deployment
+          - **Environment Configs**: Separate development, staging, and production configurations
+          - **Health Checks**: Application health monitoring endpoints
+          - **Deployment Documentation**: Clear deployment instructions
+
+          ## 6. Testing & Quality Assurance
+          - **Unit Tests**: Comprehensive test coverage for core functionality
+          - **Integration Tests**: End-to-end testing where applicable
+          - **Test Configuration**: Test runners, coverage reporting
+          - **Quality Gates**: Minimum test coverage requirements
+
+          ## 7. Documentation
+          - **README.md**: Comprehensive project documentation with:
+            - Clear project description and features
+            - Installation and setup instructions
+            - Usage examples and API documentation
+            - Development workflow
+            - Contributing guidelines
+          - **API.md**: Detailed API documentation if applicable
+          - **DEPLOYMENT.md**: Step-by-step deployment guide
+          - **DEVELOPMENT.md**: Local development setup and guidelines
+
+          ## 8. Next Steps Documentation
+          Create **NEXT_STEPS.md** with:
+          - Required environment variables and where to get them
+          - External services to configure (databases, APIs, cloud services)
+          - Manual setup steps that cannot be automated
+          - Deployment instructions and prerequisites
+          - Additional permissions, access, or accounts needed
+          - Recommended next development tasks and feature implementations
+          - Troubleshooting common setup issues
+
+          ## 9. Cleanup & Finalization
+          - Remove all template files and references
+          - Remove the original prompt.md file
+          - Ensure all generated code is functional and follows best practices
+          - Verify all configuration files have proper values or placeholders
+
+          ## Critical Requirements:
+          - Use the latest stable versions of all tools and frameworks
+          - Follow security best practices for the chosen tech stack
+          - Include comprehensive error handling and logging
+          - Make it production-ready from day one
+          - Ensure all generated code is functional and well-tested
+          - Follow naming conventions and code style for the chosen languages
+          - Include proper documentation and comments in code
+          - Configure proper environment variable handling
+          - Set up proper development and production configurations
+
+          ## Project Context:
+          - **Project Name**: PLACEHOLDER_REPO_NAME
+          - **Repository Owner**: PLACEHOLDER_REPO_OWNER
+          - **Repository**: PLACEHOLDER_GITHUB_REPOSITORY
+
+          Generate a complete, functional, and production-ready application that can be immediately deployed after following the setup instructions in NEXT_STEPS.md.
+          EOL
+
+          # Replace placeholders in the instruction file
+          sed -i "s|PLACEHOLDER_PROMPT_CONTENT|$PROMPT_CONTENT|g" .bootstrap_instruction.md
+          sed -i "s|PLACEHOLDER_REPO_NAME|$REPO_NAME|g" .bootstrap_instruction.md  
+          sed -i "s|PLACEHOLDER_REPO_OWNER|$REPO_OWNER|g" .bootstrap_instruction.md
+          sed -i "s|PLACEHOLDER_GITHUB_REPOSITORY|$GITHUB_REPOSITORY|g" .bootstrap_instruction.md
+
+          echo "📝 Bootstrap instruction prepared ($(wc -w < .bootstrap_instruction.md) words)"
+          
+          # Execute bootstrap with Claude Code
+          echo "🤖 Executing Claude Code bootstrap..."
+          timeout 1800 claude -p "$(cat .bootstrap_instruction.md)" --output-format json > .claude_output.json || CLAUDE_EXIT_CODE=$?
+
+          # Check for timeout or other errors
+          if [ "${CLAUDE_EXIT_CODE:-0}" -eq 124 ]; then
+            echo "⏰ Claude Code timed out after 30 minutes"
+            echo "This might indicate a complex project that needs more time."
+          elif [ "${CLAUDE_EXIT_CODE:-0}" -ne 0 ]; then
+            echo "❌ Claude Code bootstrap failed with exit code: ${CLAUDE_EXIT_CODE:-0}"
+            if [ -f .claude_output.json ]; then
+              echo "Claude output:"
+              cat .claude_output.json
+            fi
+            exit 1
+          fi
+
+          echo "✅ Bootstrap completed successfully"
+
+      - name: 🧹 Clean Up Template Files
+        run: |
+          echo "🧹 Cleaning up template files..."
+          
+          # Remove template and bootstrap files
+          rm -f prompt.md .bootstrap_instruction.md .claude_output.json
+          
+          # Remove template-specific directories if they exist
+          rm -rf .github/claude/ 2>/dev/null || true
+          
+          # Remove the bootstrap workflow to prevent re-running
+          rm -f .github/workflows/bootstrap-app.yml
+          
+          # Remove any template README and example files
+          rm -f TEMPLATE-README.md prompt.md.example
+          
+          echo "✅ Template files cleaned up"
+
+      - name: 📝 Commit Generated Application
+        id: commit_changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "Claude Bootstrap Bot"
+          
+          git add .
+          
+          if ! git diff --staged --quiet; then
+            # Count generated files
+            GENERATED_FILES=$(git diff --staged --name-only | wc -l)
+            
+            git commit -m "🚀 Bootstrap application via Claude Code
+
+Generated complete application structure based on requirements.
+
+📊 Summary:
+- Generated $GENERATED_FILES files
+- Complete project structure with best practices
+- Development tooling (linting, formatting, pre-commit hooks)
+- Testing framework and sample tests
+- CI/CD pipeline configuration  
+- Comprehensive documentation
+- Production-ready configuration
+
+📋 Next Steps:
+- Check the 'Bootstrap Complete' issue for configuration instructions
+- Install dependencies and follow setup guide
+- Configure required environment variables
+- Deploy and start developing!
+
+🤖 Generated by Claude Code Bootstrap Template"
+
+            git push
+            echo "✅ Changes committed and pushed ($GENERATED_FILES files)"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ No changes to commit"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🎯 Create Configuration Issue
+        if: steps.commit_changes.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Check if NEXT_STEPS.md exists
+            let nextStepsContent = '';
+            let hasNextSteps = false;
+            
+            try {
+              nextStepsContent = fs.readFileSync('NEXT_STEPS.md', 'utf8');
+              hasNextSteps = nextStepsContent.trim().length > 0;
+            } catch (error) {
+              console.log('No NEXT_STEPS.md found - application may be ready to use!');
+            }
+            
+            // Get repository information
+            const repoName = context.repo.repo;
+            const repoOwner = context.repo.owner;
+            
+            // Count generated files
+            const { execSync } = require('child_process');
+            let fileCount = 0;
+            try {
+              const output = execSync('find . -type f -not -path "./.git/*" | wc -l', { encoding: 'utf8' });
+              fileCount = parseInt(output.trim());
+            } catch (error) {
+              fileCount = 'many';
+            }
+            
+            // Create the issue
+            const issueBody = `# 🎉 Your Application Has Been Generated!
+
+Your **${repoName}** application has been successfully bootstrapped using Claude Code AI! 
+
+## ✅ What's Already Done
+
+Your project now includes:
+- 📁 **Complete project structure** following industry best practices
+- 🔧 **Development tooling** (ESLint, Prettier, pre-commit hooks)
+- 🧪 **Testing framework** setup with sample tests
+- 🚀 **CI/CD pipeline** configuration for automated deployment
+- 📚 **Comprehensive documentation** (README, API docs, deployment guides)
+- ⚙️ **Production-ready configuration** files
+- 🐳 **Containerization** setup (if applicable)
+- 📊 **Generated ${fileCount} files** ready for development
+
+## 🔧 Next Steps Required
+
+${hasNextSteps ? nextStepsContent : `**Great news!** 🎊 Your application appears to be ready to use without additional manual configuration.
+
+**To get started:**
+1. Clone this repository locally
+2. Install dependencies (\`npm install\`, \`pip install -r requirements.txt\`, etc.)
+3. Check the README.md for specific setup instructions
+4. Run the development server
+5. Start coding!`}
+
+---
+
+## 🚀 Getting Started Checklist
+
+- [ ] Clone the repository locally
+- [ ] Install dependencies
+- [ ] Configure environment variables (see above)
+- [ ] Set up external services (if required)
+- [ ] Run initial tests to verify setup
+- [ ] Start the development server
+- [ ] Deploy to your preferred platform
+
+## 📖 Documentation
+
+Check out these generated files for detailed information:
+- **README.md** - Main project documentation
+- **DEVELOPMENT.md** - Local development setup
+- **DEPLOYMENT.md** - Deployment instructions  
+- **API.md** - API documentation (if applicable)
+
+## 🆘 Need Help?
+
+If you encounter any issues:
+1. Check the generated documentation files
+2. Review the commit that created this application
+3. Open a new issue describing your problem
+4. Tag @${repoOwner} for assistance
+
+**🎯 Close this issue once you've completed all setup steps and your application is running successfully!**
+
+---
+<sub>🤖 Generated by [Claude Code Bootstrap Template](https://github.com/geoffdutton/claude-code-bootstrap-template)</sub>`;
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: hasNextSteps ? '🔧 Bootstrap Complete - Configuration Required' : '🎉 Bootstrap Complete - Ready to Use!',
+              body: issueBody,
+              labels: hasNextSteps ? ['bootstrap', 'configuration', 'setup'] : ['bootstrap', 'ready-to-use']
+            });
+
+            console.log(`✅ Created issue #${issue.data.number}: ${issue.data.title}`);
+            
+            return issue.data.number;
+
+      - name: 📊 Add Commit Comment
+        if: steps.commit_changes.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            
+            try {
+              const commitSha = execSync('git rev-parse HEAD').toString().trim();
+              
+              await github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: commitSha,
+                body: `🤖 **Claude Code Bootstrap Complete!**
+
+**✨ What was generated:**
+- ✅ Complete project structure following best practices
+- ✅ Development tooling (linting, formatting, pre-commit hooks)  
+- ✅ Testing framework with example tests
+- ✅ CI/CD pipeline configuration
+- ✅ Comprehensive documentation and guides
+- ✅ Production-ready configuration files
+
+**🎯 Next steps:**
+Check the **"Bootstrap Complete"** issue for any additional setup instructions.
+
+**🚀 Ready to develop:**
+1. \`git clone\` this repository
+2. Install dependencies
+3. Follow the setup guide in the issue
+4. Start building! 
+
+**⚡ Powered by:** [Claude Code Bootstrap Template](https://github.com/geoffdutton/claude-code-bootstrap-template)`
+              });
+              
+              console.log('✅ Added commit comment with bootstrap summary');
+            } catch (error) {
+              console.log('⚠️ Could not create commit comment:', error.message);
+            }
+
+      - name: 🎊 Bootstrap Success Summary  
+        if: steps.commit_changes.outputs.has_changes == 'true'
+        run: |
+          echo ""
+          echo "🎉🎉🎉 BOOTSTRAP COMPLETE! 🎉🎉🎉"
+          echo ""
+          echo "✅ Your application has been successfully generated!"
+          echo "✅ All files committed to the repository"
+          echo "✅ Development tooling configured and ready"
+          echo "✅ CI/CD pipeline set up for deployment"
+          echo "✅ Documentation generated"
+          echo ""
+          echo "📋 What's next:"
+          echo "  1. Check the 'Bootstrap Complete' issue for setup instructions"
+          echo "  2. Clone the repository locally"
+          echo "  3. Follow the configuration steps"
+          echo "  4. Start developing your application!"
+          echo ""
+          echo "🤖 Generated by Claude Code Bootstrap Template"
+          echo "🔗 Repository: https://github.com/${{ github.repository }}"
+          echo ""
+
+      - name: ❌ Bootstrap Failure Summary
+        if: failure()
+        run: |
+          echo ""
+          echo "❌ BOOTSTRAP FAILED"
+          echo ""
+          echo "The bootstrap process encountered an error. Common issues:"
+          echo ""
+          echo "🔑 Missing API Key:"
+          echo "  - Ensure ANTHROPIC_API_KEY is set as a repository secret"
+          echo "  - Verify the API key is valid and has sufficient credits"
+          echo ""
+          echo "📝 Prompt Issues:"
+          echo "  - Check that prompt.md exists and has content"
+          echo "  - Ensure the prompt is clear and specific"
+          echo ""
+          echo "⏰ Timeout Issues:"
+          echo "  - Complex applications may need more time"
+          echo "  - Try simplifying the initial prompt"
+          echo ""
+          echo "🔍 Debugging:"
+          echo "  - Check the workflow logs above for specific errors"
+          echo "  - Review the commit history for partial generation"
+          echo ""
+          echo "💡 Get Help:"
+          echo "  - Open an issue with the error details"
+          echo "  - Check the template repository for updates"
+          echo ""
+```
+
+Just copy this entire YAML file and save it as `.github/workflows/bootstrap-app.yml` in your template repository! 🚀​​​​​​​​​​​​​​​​
