@@ -1,6 +1,3 @@
-Here’s the complete `.github/workflows/bootstrap-app.yml` file:
-
-```yaml
 name: 🚀 Bootstrap Application with Claude Code
 
 on:
@@ -477,6 +474,3 @@ Check the **"Bootstrap Complete"** issue for any additional setup instructions.
           echo "  - Open an issue with the error details"
           echo "  - Check the template repository for updates"
           echo ""
-```
-
-Just copy this entire YAML file and save it as `.github/workflows/bootstrap-app.yml` in your template repository! 🚀​​​​​​​​​​​​​​​​
