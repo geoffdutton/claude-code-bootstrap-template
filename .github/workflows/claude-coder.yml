@@ -25,6 +25,16 @@ jobs:
       actions: read
       id-token: write
     steps:
+      - name: Add initial reaction
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'eyes'
+            });
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -34,9 +44,11 @@ jobs:
         id: claude
         uses: anthropics/claude-code-action@v1
         with:
+          # Pass the conflict resolution prompt directly
           github_token: ${{ secrets.GITHUB_TOKEN }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_args: |
             --max-turns 15
+            --system-prompt "You are an expert coder with a hacker MVP metality. Ensure the code remains functional changes and Always verify your changes before pushing with tests and formatting."
             --allowedTools "WebSearch,WebFetch,Edit,MultiEdit,Write,Read,Glob,Grep,LS,Bash(git:*),Bash(bun:*),Bash(npm:*),Bash(npx:*),Bash(gh:*)"
             
