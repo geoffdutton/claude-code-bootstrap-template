@@ -13,10 +13,10 @@ on:
 jobs:
   claude:
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claudecode')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claudecode')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claudecode')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claudecode') || contains(github.event.issue.title, '@claudecode')))
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '/claudecode')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '/claudecode')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '/claudecode')) ||
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '/claudecode') || contains(github.event.issue.title, '/claudecode')))
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -34,7 +34,7 @@ jobs:
         id: claude
         uses: anthropics/claude-code-action@v1
         with:
-          trigger_phrase: "@claudcode"
+          trigger_phrase: "/claudecode"
           label_trigger: "claudecode"
           # Pass the conflict resolution prompt directly
           github_token: ${{ secrets.GITHUB_TOKEN }}
