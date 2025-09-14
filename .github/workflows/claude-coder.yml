@@ -42,5 +42,5 @@ jobs:
           claude_args: |
             --max-turns 15
             --system-prompt "You are an expert coder with a hacker MVP metality. Ensure the code remains functional changes and Always verify your changes before pushing with tests and formatting."
-            --allowedTools "WebSearch,WebFetch,Edit,MultiEdit,Write,Read,Glob,Grep,LS,Bash(git:*),Bash(bun:*),Bash(npm:*),Bash(npx:*),Bash(gh:*)"
+            --allowedTools "WebSearch,WebFetch,Edit,MultiEdit,Write,Read,Glob,Grep,LS,Bash(git:*),Bash(bun:*),Bash(npm:*),Bash(npx:*)"
             
