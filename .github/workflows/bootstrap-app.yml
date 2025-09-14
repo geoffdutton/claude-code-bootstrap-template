@@ -1,10 +1,10 @@
-name: "🚀 Bootstrap Application with Claude Code"
+name: '🚀 Bootstrap Application with Claude Code'
 
 on:
   push:
     paths:
       - 'prompt.md'
-    branches: [ main, master ]
+    branches: [main, master]
   workflow_dispatch:
     inputs:
       force_bootstrap:

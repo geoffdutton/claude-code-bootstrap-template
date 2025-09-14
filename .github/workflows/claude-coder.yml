@@ -34,8 +34,8 @@ jobs:
         id: claude
         uses: anthropics/claude-code-action@v1
         with:
-          trigger_phrase: "/claudecode"
-          label_trigger: "claudecode"
+          trigger_phrase: '/claudecode'
+          label_trigger: 'claudecode'
           # Pass the conflict resolution prompt directly
           github_token: ${{ secrets.GITHUB_TOKEN }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -43,4 +43,3 @@ jobs:
             --max-turns 15
             --system-prompt "You are an expert coder with a hacker MVP metality. Ensure the code remains functional changes and Always verify your changes before pushing with tests and formatting."
             --allowedTools "WebSearch,WebFetch,Edit,MultiEdit,Write,Read,Glob,Grep,LS,Bash(git:*),Bash(bun:*),Bash(npm:*),Bash(npx:*),Bash(gh:*)"
-            
