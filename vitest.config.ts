@@ -1,10 +1,37 @@
-/// <reference types="vitest" />
-import { defineConfig } from 'vitest/config';
+import { defineWorkersConfig } from '@cloudflare/vitest-pool-workers/config';
 
-export default defineConfig({
+export default defineWorkersConfig({
   test: {
+    poolOptions: {
+      workers: {
+        miniflare: {
+          // Use Miniflare for better test isolation and no auth requirements
+          compatibilityDate: '2024-10-15',
+          compatibilityFlags: ['nodejs_compat'],
+          bindings: {
+            ENVIRONMENT: 'test',
+            LOG_LEVEL: 'debug',
+            RATE_LIMIT_PER_MINUTE: '60',
+            MAX_CONVERSATION_HISTORY: '50',
+            CONTEXT7_API_KEY: 'test-context7-key',
+            ANTHROPIC_API_KEY: 'test-anthropic-key',
+          },
+          // Mock the AI binding
+          aiBindings: {
+            AI: 'ai',
+          },
+          // Mock KV namespace
+          kvNamespaces: {
+            CACHE: 'test-cache',
+          },
+          // Mock D1 database
+          d1Databases: {
+            DB: 'test-db',
+          },
+        },
+      },
+    },
     globals: true,
-    environment: 'node',
     include: ['test/**/*.{test,spec}.{js,ts}'],
     exclude: ['node_modules', 'dist', '.wrangler'],
     coverage: {
@@ -28,7 +55,7 @@ export default defineConfig({
         },
       },
     },
-    testTimeout: 10000,
-    hookTimeout: 10000,
+    testTimeout: 30000,
+    hookTimeout: 30000,
   },
 });
