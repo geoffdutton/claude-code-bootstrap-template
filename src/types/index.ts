@@ -63,20 +63,6 @@ export interface RateLimitInfo {
   blocked: boolean;
 }
 
-export interface Context7MCPRequest {
-  method: string;
-  params: Record<string, unknown>;
-}
-
-export interface Context7MCPResponse {
-  result?: unknown;
-  error?: {
-    code: number;
-    message: string;
-    data?: unknown;
-  };
-}
-
 export interface ErrorResponse {
   error: string;
   code: string;

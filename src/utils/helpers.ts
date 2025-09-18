@@ -1,4 +1,5 @@
 import type { ErrorResponse } from '../types';
+import { z } from 'zod';
 
 export function generateId(): string {
   return crypto.randomUUID();
@@ -26,40 +27,32 @@ export function createErrorResponse(
   return response;
 }
 
+// Zod schema for agent request validation
+const AgentRequestSchema = z.object({
+  message: z.string().min(1, 'Message is required and must be a non-empty string'),
+  conversationId: z.string().optional(),
+  userId: z.string().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
 export function validateAgentRequest(body: unknown): {
   isValid: boolean;
   errors: string[];
+  data?: z.infer<typeof AgentRequestSchema>;
 } {
-  const errors: string[] = [];
-
-  if (typeof body !== 'object' || body === null) {
-    errors.push('Request body must be a valid JSON object');
-    return { isValid: false, errors };
+  const result = AgentRequestSchema.safeParse(body);
+  
+  if (result.success) {
+    return {
+      isValid: true,
+      errors: [],
+      data: result.data,
+    };
   }
-
-  const request = body as Record<string, unknown>;
-
-  if (typeof request.message !== 'string' || request.message.trim().length === 0) {
-    errors.push('Message is required and must be a non-empty string');
-  }
-
-  if (request.conversationId !== undefined && typeof request.conversationId !== 'string') {
-    errors.push('conversationId must be a string if provided');
-  }
-
-  if (request.userId !== undefined && typeof request.userId !== 'string') {
-    errors.push('userId must be a string if provided');
-  }
-
-  if (
-    request.metadata !== undefined &&
-    (typeof request.metadata !== 'object' || request.metadata === null)
-  ) {
-    errors.push('metadata must be an object if provided');
-  }
-
+  
+  const errors = result.error.errors.map(err => err.message);
   return {
-    isValid: errors.length === 0,
+    isValid: false,
     errors,
   };
 }
