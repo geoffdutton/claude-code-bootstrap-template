@@ -16,7 +16,7 @@
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 22+
 - Cloudflare account
 - Wrangler CLI
 - Context7 API key

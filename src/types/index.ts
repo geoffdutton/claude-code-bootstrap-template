@@ -15,6 +15,25 @@ export interface Environment {
   ANTHROPIC_API_KEY?: string;
 }
 
+// AI Response Types
+export interface AITextResponse {
+  response: string;
+}
+
+export interface AIIntentResponse {
+  intent: string;
+  confidence: number;
+}
+
+export interface AIKeywordsResponse {
+  keywords: string[];
+}
+
+export interface AIMessageFormat {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+
 export interface AgentRequest {
   message: string;
   conversationId?: string;

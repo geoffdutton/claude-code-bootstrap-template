@@ -18,7 +18,7 @@ jobs:
       - name: ⚡ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: '.nvmrc'
           cache: 'npm'
 
       - name: 📦 Install dependencies
@@ -36,13 +36,12 @@ jobs:
       - name: 🧪 Run tests
         run: npm run test:coverage
 
-      - name: 📊 Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+      - name: 📊 Upload coverage report
+        uses: davelosert/vitest-coverage-report-action@v2
         if: success()
         with:
-          file: ./coverage/lcov.info
-          flags: unittests
-          name: codecov-umbrella
+          json-summary-path: './coverage/coverage-summary.json'
+          json-final-path: './coverage/coverage-final.json'
 
   deploy-staging:
     name: Deploy to Staging
@@ -57,7 +56,7 @@ jobs:
       - name: ⚡ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: '.nvmrc'
           cache: 'npm'
 
       - name: 📦 Install dependencies
@@ -81,7 +80,7 @@ jobs:
       - name: ⚡ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: '.nvmrc'
           cache: 'npm'
 
       - name: 📦 Install dependencies

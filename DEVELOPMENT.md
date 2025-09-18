@@ -6,7 +6,7 @@ This guide helps you set up and contribute to the Cloudflare Agent project.
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 22+
 - npm or yarn
 - Git
 - VS Code (recommended)

@@ -1,5 +1,8 @@
-import type { Environment, ConversationMessage } from '../types';
+import type { Environment, ConversationMessage, AITextResponse, AIIntentResponse, AIKeywordsResponse, AIMessageFormat } from '../types';
 import { logWithLevel } from '../utils/helpers';
+
+// Model configuration
+const AI_MODEL = '@cf/meta/llama-3.1-8b-instruct' as const;
 
 export class AIService {
   private readonly ai: Ai;
@@ -22,13 +25,14 @@ export class AIService {
         hasContext: Boolean(context),
       });
 
-      // Call Cloudflare AI
-      const response = (await this.ai.run('@cf/meta/llama-3.1-8b-instruct', {
+      // Call Cloudflare AI with structured output
+      const response = await this.ai.run(AI_MODEL as any, {
         messages,
         max_tokens: 2048,
         temperature: 0.7,
         top_p: 0.9,
-      })) as { response: string };
+        response_format: { type: 'json_object' },
+      }) as AITextResponse;
 
       if (!response.response) {
         throw new Error('AI response was empty');
@@ -49,8 +53,8 @@ export class AIService {
     currentMessage: string,
     conversationHistory: ConversationMessage[],
     context?: string
-  ): Array<{ role: string; content: string }> {
-    const messages: Array<{ role: string; content: string }> = [];
+  ): AIMessageFormat[] {
+    const messages: AIMessageFormat[] = [];
 
     // Add system message with context if provided
     let systemMessage = `You are a helpful AI assistant integrated with Context7 for enhanced contextual understanding. 
@@ -102,11 +106,12 @@ Focus on key topics, decisions, and important information discussed.`,
         },
       ];
 
-      const response = (await this.ai.run('@cf/meta/llama-3.1-8b-instruct', {
+      const response = await this.ai.run(AI_MODEL as any, {
         messages: summaryMessages,
         max_tokens: 512,
         temperature: 0.3,
-      })) as { response: string };
+        response_format: { type: 'json_object' },
+      }) as AITextResponse;
 
       return response.response?.trim() || 'Could not generate summary.';
     } catch (error) {
@@ -129,22 +134,19 @@ Return them as a comma-separated list. Focus on nouns, important concepts, and k
         },
       ];
 
-      const response = (await this.ai.run('@cf/meta/llama-3.1-8b-instruct', {
+      const response = await this.ai.run(AI_MODEL as any, {
         messages,
         max_tokens: 256,
         temperature: 0.2,
-      })) as { response: string };
+        response_format: { type: 'json_object' },
+      }) as AIKeywordsResponse;
 
-      if (!response.response) {
+      if (!response.keywords || !Array.isArray(response.keywords)) {
         return [];
       }
 
-      // Parse the comma-separated keywords
-      return response.response
-        .split(',')
-        .map(keyword => keyword.trim())
-        .filter(keyword => keyword.length > 0)
-        .slice(0, 10); // Limit to 10 keywords
+      // Return the keywords array, limited to 10 items
+      return response.keywords.slice(0, 10);
     } catch (error) {
       logWithLevel('error', 'Failed to extract keywords', { error });
       return [];
@@ -175,18 +177,18 @@ Format: "intent: <category>, confidence: <score>"`,
         },
       ];
 
-      const response = (await this.ai.run('@cf/meta/llama-3.1-8b-instruct', {
+      const response = await this.ai.run(AI_MODEL as any, {
         messages,
         max_tokens: 50,
         temperature: 0.1,
-      })) as { response: string };
+        response_format: { type: 'json_object' },
+      }) as AIIntentResponse;
 
-      // Parse the response
-      const match = response.response?.match(/intent:\s*(\w+),\s*confidence:\s*([\d.]+)/i);
-      if (match && match[1] && match[2]) {
+      // Return the structured response directly
+      if (response.intent && typeof response.confidence === 'number') {
         return {
-          intent: match[1].toLowerCase(),
-          confidence: Math.min(1, Math.max(0, parseFloat(match[2]))),
+          intent: response.intent.toLowerCase(),
+          confidence: Math.min(1, Math.max(0, response.confidence)),
         };
       }
 
