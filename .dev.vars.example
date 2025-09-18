@@ -1,0 +1,14 @@
+# Secrets Configuration
+# Copy this file to .dev.vars and fill in your actual values
+# These values will be available as secrets in the worker environment
+
+# Context7 MCP API Key (required for MCP integration)
+CONTEXT7_API_KEY=your-context7-api-key-here
+
+# Anthropic API Key (optional - for external Claude API calls)
+ANTHROPIC_API_KEY=your-anthropic-api-key-here
+
+# Other secrets can be added here as needed
+# Example:
+# DATABASE_CONNECTION_STRING=your-database-connection-string
+# EXTERNAL_API_TOKEN=your-external-api-token

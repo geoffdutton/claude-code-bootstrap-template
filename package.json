@@ -1,0 +1,65 @@
+{
+  "name": "quantum-mcp-agent",
+  "version": "1.0.0",
+  "description": "A quantum-powered Cloudflare Worker agent with Context7 MCP integration and advanced AI capabilities",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "tsc --noEmit && wrangler deploy --dry-run",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "agents": "^0.1.4"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.9.2",
+    "@cloudflare/workers-types": "^4.20250918.0",
+    "@eslint/js": "^9.35.0",
+    "@types/node": "^24.3.3",
+    "@typescript-eslint/eslint-plugin": "^8.44.0",
+    "@typescript-eslint/parser": "^8.44.0",
+    "@vitest/coverage-v8": "~3.2.0",
+    "eslint": "^9.35.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "undici": "^7.16.0",
+    "vitest": "~3.2.0",
+    "wrangler": "^3.86.1"
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "keywords": [
+    "cloudflare",
+    "worker",
+    "agent",
+    "ai",
+    "context7",
+    "mcp",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT"
+}

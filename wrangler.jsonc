@@ -1,0 +1,54 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "quantum-mcp-agent",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-10-15",
+  "compatibility_flags": ["nodejs_compat"],
+  
+  "env": {
+    "development": {
+      "name": "quantum-mcp-agent-dev"
+    },
+    "staging": {
+      "name": "quantum-mcp-agent-staging"
+    },
+    "production": {
+      "name": "quantum-mcp-agent-prod"
+    }
+  },
+
+  "ai": {
+    "binding": "AI"
+  },
+
+  "kv_namespaces": [
+    {
+      "binding": "CACHE",
+      "id": "your-kv-namespace-id",
+      "preview_id": "your-preview-kv-namespace-id"
+    }
+  ],
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "agent-conversations",
+      "database_id": "your-d1-database-id"
+    }
+  ],
+
+  "vars": {
+    "ENVIRONMENT": "development",
+    "LOG_LEVEL": "info",
+    "RATE_LIMIT_PER_MINUTE": "60",
+    "MAX_CONVERSATION_HISTORY": "50"
+  },
+
+  "build": {
+    "command": "npm run build"
+  }
+}

@@ -6,17 +6,17 @@ on:
     types: [created]
   pull_request_review_comment:
     types: [created]
-  
+
   # Automatically handle new issues and PRs
   issues:
     types: [opened, assigned, labeled]
   pull_request:
     types: [opened, reopened]
-    
+
   # Scheduled maintenance tasks
   schedule:
-    - cron: '0 9 * * 1'  # Every Monday at 9 AM UTC
-    
+    - cron: '0 9 * * 1' # Every Monday at 9 AM UTC
+
   # Manual trigger for admin tasks
   workflow_dispatch:
     inputs:
@@ -43,7 +43,7 @@ jobs:
       pull-requests: write
       actions: write
       checks: write
-      
+
     steps:
       - name: 🔍 Checkout repository
         uses: actions/checkout@v4
@@ -77,47 +77,6 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           prompt: ${{ steps.set-prompt.outputs.prompt }}
-            
-          # Enhanced system prompt for template management
-          append_system_prompt: |
-            You are the official maintainer agent for the Claude Code Bootstrap Template repository.
-            
-            **Your Role:**
-            - Template maintainer and expert
-            - Issue triager and support specialist  
-            - Code reviewer and quality guardian
-            - Documentation curator
-            - Community helper
-            
-            **Repository Context:**
-            This is a GitHub template repository that helps developers bootstrap complete applications using Claude Code AI. Users create repositories from this template, add a prompt.md file, and the bootstrap workflow generates a full application.
-            
-            **Key Files to Understand:**
-            - `.github/workflows/bootstrap-app.yml` - Main bootstrap workflow
-            - `README.md` - Template usage instructions
-            - `prompt.example.md` - Example prompts for users
-            
-            **Common Tasks:**
-            1. **Issue Triage**: Label issues (bug, enhancement, question, template-improvement)
-            2. **Bug Fixes**: Investigate and fix workflow or template issues
-            3. **Feature Enhancements**: Improve bootstrap process, add new capabilities
-            4. **Documentation**: Keep examples and guides up to date
-            5. **User Support**: Help users with template usage and troubleshooting
-            
-            **Response Style:**
-            - Be helpful and professional
-            - Provide clear, actionable guidance
-            - Include code examples when relevant
-            - Always test changes thoroughly
-            - Create PRs for non-trivial changes
-            
-            **When to Create PRs vs Direct Commits:**
-            - Create PRs for: new features, significant changes, workflow modifications
-            - Direct commit for: typo fixes, documentation updates, dependency bumps
-            
-          # Tools available to Claude
-          allowed_tools: |
-            Bash(git:*,npm:*,curl:*)
             View
             GlobTool
             GrepTool
@@ -126,7 +85,7 @@ jobs:
             mcp__github__create_issue_comment
             mcp__github__add_labels_to_issue
             mcp__github__create_review_comment
-            
+
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
 
   # Specialized jobs for different automation patterns
@@ -138,17 +97,17 @@ jobs:
     permissions:
       contents: read
       issues: write
-      
+
     steps:
       - name: 🔍 Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: 🧪 Test Template Functionality
         uses: anthropics/claude-code-action@v1
         with:
           prompt: |
             Test the Claude Bootstrap Template functionality:
-            
+
             1. **Validate Workflow File**: Check `.github/workflows/bootstrap-app.yml` for:
                - Syntax correctness
                - Latest action versions
@@ -171,7 +130,7 @@ jobs:
                - Potential improvements
                
             Create an issue with findings if problems are detected, or comment that all tests passed.
-            
+
           allowed_tools: |
             Bash(git:*,curl:*,node:*,npm:*)
             View
@@ -179,7 +138,7 @@ jobs:
             GrepTool
             mcp__github__create_issue
             mcp__github__create_issue_comment
-            
+
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
 
   community-engagement:
@@ -193,23 +152,23 @@ jobs:
       contents: read
       issues: write
       pull-requests: write
-      
+
     steps:
-      - name: 🔍 Checkout repository  
+      - name: 🔍 Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: 👥 Community Support Agent
         uses: anthropics/claude-code-action@v1
         with:
           prompt: |
             You are a community support specialist for the Claude Bootstrap Template.
-            
+
             **Current Event**: ${{ github.event_name }}
             **Event Details**: 
             ${{ github.event_name == 'issues' && format('New issue: {0} - {1}', github.event.issue.title, github.event.issue.body) }}
             ${{ github.event_name == 'pull_request' && format('New PR: {0} - {1}', github.event.pull_request.title, github.event.pull_request.body) }}
             ${{ github.event_name == 'issue_comment' && format('Comment on issue: {0}', github.event.comment.body) }}
-            
+
             **Your Tasks**:
             1. **Issue Categorization**: Add appropriate labels:
                - `question` - User needs help
@@ -231,7 +190,7 @@ jobs:
                - Flag security concerns
                
             Be welcoming, helpful, and professional. Always try to solve the user's problem.
-            
+
           allowed_tools: |
             View
             GlobTool
@@ -239,7 +198,7 @@ jobs:
             mcp__github__add_labels_to_issue
             mcp__github__create_issue_comment
             mcp__github__create_review_comment
-            
+
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
 
   security-audit:
@@ -252,19 +211,19 @@ jobs:
       issues: write
       pull-requests: write
       security-events: write
-      
+
     steps:
       - name: 🔍 Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: 🔒 Security Audit Agent
         uses: anthropics/claude-code-action@v1
         with:
           prompt: |
             Perform a comprehensive security audit of the Claude Bootstrap Template:
-            
+
             **Audit Areas:**
-            
+
             1. **GitHub Actions Security**:
                - Check for hardcoded secrets or credentials
                - Validate permission scopes are minimal
@@ -293,7 +252,7 @@ jobs:
             - Suggest fixes with PRs where appropriate  
             - Update documentation with security guidance
             - Generate security recommendations
-            
+
           allowed_tools: |
             Bash(git:*,curl:*,gh:*)
             View
@@ -302,5 +261,5 @@ jobs:
             BatchTool
             mcp__github__create_issue
             mcp__github__create_pull_request
-            
+
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
