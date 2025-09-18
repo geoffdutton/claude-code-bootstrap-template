@@ -4,31 +4,7 @@ export default defineWorkersConfig({
   test: {
     poolOptions: {
       workers: {
-        miniflare: {
-          // Use Miniflare for better test isolation and no auth requirements
-          compatibilityDate: '2024-10-15',
-          compatibilityFlags: ['nodejs_compat'],
-          bindings: {
-            ENVIRONMENT: 'test',
-            LOG_LEVEL: 'debug',
-            RATE_LIMIT_PER_MINUTE: '60',
-            MAX_CONVERSATION_HISTORY: '50',
-            CONTEXT7_API_KEY: 'test-context7-key',
-            ANTHROPIC_API_KEY: 'test-anthropic-key',
-          },
-          // Mock the AI binding
-          aiBindings: {
-            AI: 'ai',
-          },
-          // Mock KV namespace
-          kvNamespaces: {
-            CACHE: 'test-cache',
-          },
-          // Mock D1 database
-          d1Databases: {
-            DB: 'test-db',
-          },
-        },
+        wrangler: { configPath: './wrangler.jsonc' },
       },
     },
     globals: true,
@@ -36,7 +12,7 @@ export default defineWorkersConfig({
     exclude: ['node_modules', 'dist', '.wrangler'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'json-summary'],
       exclude: [
         'node_modules/',
         'dist/',

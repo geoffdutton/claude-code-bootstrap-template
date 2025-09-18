@@ -113,6 +113,10 @@ dist
 worker/
 .dev.vars
 
+# Keep example files for reference
+!.dev.vars.example
+!.dev.vars.ci
+
 # macOS
 .DS_Store
 

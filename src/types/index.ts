@@ -4,13 +4,13 @@ export interface Environment {
   CACHE: KVNamespace;
   DB: D1Database;
 
-  // Environment variables
+  // Environment variables (from wrangler.jsonc vars)
   ENVIRONMENT: string;
   LOG_LEVEL: string;
   RATE_LIMIT_PER_MINUTE: string;
   MAX_CONVERSATION_HISTORY: string;
 
-  // Secrets
+  // Secrets (from .dev.vars)
   CONTEXT7_API_KEY?: string;
   ANTHROPIC_API_KEY?: string;
 }

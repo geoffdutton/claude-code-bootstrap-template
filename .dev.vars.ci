@@ -1,0 +1,5 @@
+# CI/CD Environment Variables for Testing
+# This file contains test secrets for CI/CD environments
+
+CONTEXT7_API_KEY=test-context7-key-for-ci
+ANTHROPIC_API_KEY=test-anthropic-key-for-ci
